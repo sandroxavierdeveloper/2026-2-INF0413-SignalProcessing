@@ -62,14 +62,25 @@ def SIGNALdelay(x, k):
 # ─────────────────────────────────────────────
 # SIGNALplot
 # ─────────────────────────────────────────────
-def SIGNALplot(x, n=None, title='Sinal Discreto x[n]', color='r'):
-    """Plota um sinal discreto como stem plot."""
-    if n is None:
-        n = np.arange(len(x))
+def SIGNALplot(x, n=None, title='Sinal Discreto x[n]', color='r', xlim=None,
+               xlabel='n (amostras)', max_stem=2000):
+    """Plota um sinal discreto como stem plot.
+
+    xlim    : [xmin, xmax] opcional, recorte do eixo horizontal.
+    max_stem: acima desse número de amostras visíveis, usa linha (plot) em vez de stem.
+    """
+    x = np.asarray(x)
+    n = np.arange(len(x)) if n is None else np.asarray(n)
+    visible = len(x) if xlim is None else int(np.count_nonzero((n >= xlim[0]) & (n <= xlim[1])))
     fig, ax = plt.subplots(figsize=(10, 4))
-    ax.stem(n, x, linefmt=f'{color}-', markerfmt=f'{color}o', basefmt=' ')
+    if visible <= max_stem:
+        ax.stem(n, x, linefmt=f'{color}-', markerfmt=f'{color}o', basefmt=' ')
+    else:
+        ax.plot(n, x, color=color)
+    if xlim is not None:
+        ax.set_xlim(xlim)
     ax.set_title(title)
-    ax.set_xlabel('n (amostras)')
+    ax.set_xlabel(xlabel)
     ax.set_ylabel('Amplitude')
     ax.grid(True)
     plt.show()
