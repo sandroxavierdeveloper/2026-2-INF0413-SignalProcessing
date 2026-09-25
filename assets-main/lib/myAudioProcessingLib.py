@@ -6,7 +6,7 @@ Audio Processing Library
 import numpy as np
 import wave # para reproduzir arquivos WAV
 from music21 import midi # para reproduzir arquivos MIDI
-from IPython.display import Audio
+from IPython.display import Audio, display
 
 def audioread(filename):
     '''
