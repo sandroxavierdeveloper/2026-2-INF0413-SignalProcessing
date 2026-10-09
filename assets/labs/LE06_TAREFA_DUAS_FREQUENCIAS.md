@@ -3,10 +3,13 @@
 Preparação para a tarefa que o professor pediu em aula (e que deve pedir de novo, talvez com variações).
 Os números das tabelas foram testados no Python.
 
-**Onde está no notebook:** `le06_DFT/le06_01_DFT-four-versions.ipynb`, seção
-**"Um sinal com duas frequências: 900 Hz + 1200 Hz"** — as últimas células do notebook
-(célula 48 = explicação; 49 = sinal e som; 50 = DFT e frequências encontradas; 51 = gráfico).
-Em script: `le06_DFT/le06_duas_frequencias.py`.
+**Onde está no notebook:** `le06_DFT/le06_01_DFT-four-versions.ipynb`, no fim:
+
+- seção **"Um sinal com duas frequências: 900 Hz + 1200 Hz"** — célula 48 = explicação; 49 = sinal e som;
+  50 = DFT e frequências encontradas; 51 = gráfico;
+- seção **"Remover um som com a DFT: violão + guitarra → só o violão"** — células 53 a 60 (a parte 2 abaixo).
+
+Em script: `le06_DFT/le06_duas_frequencias.py` (parte 1) e `le06_DFT/le06_remover_guitarra.py` (parte 2).
 
 > Os números entre colchetes ao lado das células no JupyterLab (`[88]`, `[93]`…) **não são linhas**: contam
 > quantas vezes você executou algo no kernel. Para ver a posição de uma célula, use o sumário
@@ -104,3 +107,72 @@ da tabela).
 4. Rode o caso de **vazamento** (N = 1024 com fs = 8000) e compare com N = 800.
 
 Para a teoria por trás (as quatro versões da DFT, simetria, Parseval), ver `LE06_DFT_EXPLICACAO.md`.
+
+---
+
+# Parte 2: remover uma das frequências (violão + guitarra → só o violão)
+
+A continuação da tarefa: **um dos sons é indesejado e tem de sair**. Exemplo: a gravação pegou um **violão** e uma
+**guitarra** tocando juntos, e se quer só o violão. Cada instrumento é um sinal oscilatório:
+
+| instrumento | frequência | como é gerado | papel |
+|---|---|---|---|
+| violão | 900 Hz | `np.sin` direto | fica |
+| guitarra | 1200 Hz | primitiva `osc` | sai |
+
+## O código para digitar na hora
+
+```python
+import numpy as np
+
+fs = 8192                      # 1 s de sinal = 8192 amostras -> resolução fs/N = 1 Hz
+N  = fs
+n  = np.arange(N)
+
+violao   = np.sin(2*np.pi*900*n/fs)
+guitarra = np.sin(2*np.pi*1200*n/fs)          # no notebook: SIGNALgenerate(N, 'osc', period=fs/1200)
+mistura  = violao + guitarra
+
+X = np.fft.fft(mistura)        # 1. análise: para a frequência
+k = round(1200 / (fs/N))       #    bin da guitarra = 1200
+X[k]     = 0                   # 2. remover: a frequência positiva...
+X[N - k] = 0                   #    ...e o espelho
+saida = np.fft.ifft(X).real    # 3. síntese: de volta ao tempo
+
+print(np.allclose(saida, violao))   # True: sobrou só o violão
+```
+
+## Linha por linha: o que dizer
+
+1. **No tempo não dá para separar**: cada amostra da mistura é a soma das duas. Não existe "a amostra da guitarra".
+2. **Na frequência, cada som é um pico num bin diferente**: violão em k = 900, guitarra em k = 1200 (com fs/N = 1 Hz, o
+   bin é a própria frequência).
+3. **Remover = zerar o bin da guitarra.** Zerar um número no espectro é tirar aquela frequência do sinal.
+4. **Zerar também o espelho, N − k.** Um seno real é a soma de duas setas girando em sentidos opostos:
+
+       sen(ωn) = ( e^(jωn) − e^(−jωn) ) / 2j
+
+   A DFT mostra uma seta no bin k e a outra no bin N − k. Se zerar só o k, a saída fica **complexa** e a guitarra
+   continua lá com **metade** da amplitude (medido no notebook: parte imaginária até 0,50, guitarra com 0,50 em vez
+   de 1,00).
+5. **IDFT de volta ao tempo**: a saída é o violão puro (erro de 10⁻¹³). O `.real` só descarta o arredondamento.
+
+Isso é um **filtro**: um sistema que deixa passar umas frequências e bloqueia outras. Este, que zera um bin, é o filtro
+mais seletivo possível — tira uma frequência e não encosta em nenhuma outra.
+
+## Variações que o professor pode pedir
+
+| Se ele pedir… | Resposta |
+|---|---|
+| **Remover o violão em vez da guitarra** | Zerar o bin 900 e o N − 900. Sobra a guitarra pura (o notebook faz os dois). |
+| **Frequência que não cai num bin exato** | Ela vaza para os bins vizinhos; zerar um só deixa resto. É preciso zerar uma **faixa** em volta — é o que faz a função `apagar_frequencia(x, fs, f, largura)` do notebook. |
+| **Com N pequeno, sem ser 1 s inteiro** | Processar em **blocos** (o script faz blocos de 800 com fs = 8000). Funciona limpo porque cada bloco tem um número inteiro de ciclos das duas frequências (90 e 120). |
+| **E um violão e uma guitarra de verdade?** | Um instrumento real tem a fundamental **e os harmônicos** (2×, 3×… — o timbre, do le04). Seria preciso zerar todos os harmônicos da guitarra; onde um coincide com um do violão, remover um apaga um pedaço do outro. Por isso separar instrumentos reais é difícil. |
+
+## Como explicar em 1 minuto
+
+> "Somei um violão de 900 Hz e uma guitarra de 1200 Hz, gerada com o `osc`. No tempo eles estão misturados em cada
+> amostra e não dá para separar. Com a DFT, cada um vira um pico num bin diferente. Para remover a guitarra, zerei o
+> bin dela — e também o espelho, N − k, porque um seno real aparece nos dois lados do espectro; se esquecer o
+> espelho, sobra metade da guitarra. Com a IDFT voltei ao tempo, e a saída é igual ao violão original. Isso é um
+> filtro feito na frequência."
