@@ -228,7 +228,7 @@ Estes pontos foram achados conferindo o notebook e já estão corrigidos. Vale s
 
 4. **Ganho e sustentação do baixo:** o texto dizia que cada nota tinha um ganho e que o D2 soava mais tempo, mas o código usava ganho 1 e o mesmo α para tudo. Agora o `ks_acorde` aceita ganho por nota e um α próprio por nota (`sustentar`): D2 com ganho 1,5 e α = 0,998, G5 com ganho 0,6, as demais com 1,0 e α = 0,99.
 
-5. **Comentários sobre outro projeto removidos:** havia um comentário e uma seção final ("Achados e Referências: Karplus-Strong e o KOPPA") sobre um software sem relação com a disciplina.
+5. **Comentários sobre outro projeto removidos:** havia um comentário no `ks_acorde` e uma seção final sobre um software sem relação com a disciplina.
 
 6. **Resposta do "Teste final" reescrita:** a anterior falava em "filtro comb", mas o `KS_1` só repete, não filtra. A resposta nova (seção 3.7) vem com a conferência no espectro.
 
