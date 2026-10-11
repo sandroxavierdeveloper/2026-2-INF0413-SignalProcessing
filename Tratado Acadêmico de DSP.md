@@ -266,7 +266,7 @@ Etapa dois: as versões Karplus-Strong dois e três, correspondentes ao decaimen
 
 Etapa três: a versão canônica Karplus-Strong Média, publicada em mil novecentos e oitenta e três. A grande inovação consistiu em introduzir um filtro passa-baixas elementar de duas amostras dentro da malha de realimentação. A cada ciclo, o valor que retorna à linha de atraso é a média aritmética simples entre duas amostras consecutivas:
 
-O valor sintetizado y de n é igual ao coeficiente alfa de decaimento multiplicado pela média entre y de n menos M e y de n menos M menos um.
+O valor sintetizado y de n é igual à entrada x de n, mais o coeficiente alfa de decaimento multiplicado pela média entre y de n menos M e y de n menos M menos um.
 
 Este simples cálculo de média de duas amostras adjacentes atua como um filtro passa-baixas eficiente. A cada passagem pela malha, as oscilações rápidas agudas perdem energia muito mais velozmente do que os harmônicos graves. O som resultante transforma o ruído inicial caótico em um tom brilhante que suaviza gradualmente para uma ressonância quente e doce, emulando com precisão assombrosa o dedilhar de um violão real.
 
